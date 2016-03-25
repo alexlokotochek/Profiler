@@ -85,17 +85,25 @@ public class FileScanner {
 
             thisIndex = methodsIndex.get(method);
 
-            String toPrint = String.format("method \"%s\":\n", method);
-            toPrint += String.format("min: %.3f seconds\n",
+            // Формат вывода:
+            // OperationsImpl:getData min 123, max 846, avg 315, max id 22, count 333
+            // будем выводить тысячные доли секунды, так как часто min < 1
+            // в качестве разделителя возьмём ';', потому что дробная часть после ','
+
+            // время хранится в Long: milliseconds, так что делим их на 1000 для секунд
+
+            String toPrint = String.format("OperationsImpl:%s ", method);
+            toPrint += String.format("min %.3f; ",
                                      (1.*minimums.get(thisIndex))/1e3);
-            toPrint += String.format("max: %.3f seconds\n",
+            toPrint += String.format("max %.3f; ",
                                      (1.*maximums.get(thisIndex))/1e3);
-            toPrint += String.format("mean: %.6f seconds\n",
+            toPrint += String.format("avg %.3f; ",
                                      (1.* sumTime.get(thisIndex)/callsAmount.get(thisIndex))/1e3);
-            toPrint += String.format("total calls: %d\n",
-                                     callsAmount.get(thisIndex));
-            toPrint += String.format("longest call ID: %d\n",
+            toPrint += String.format("max id %d; ",
                                      longestCallsID.get(thisIndex));
+            toPrint += String.format("count %d",
+                                     callsAmount.get(thisIndex));
+
             toPrint += "\n";
 
             System.out.print(toPrint);
