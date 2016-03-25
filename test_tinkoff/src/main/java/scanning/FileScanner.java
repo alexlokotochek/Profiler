@@ -18,7 +18,6 @@ public class FileScanner {
     ArrayList<Long> timers;
     HashMap<String, Integer> methodsIndex; // метод и его индекс в timers
 
-
     public void scan (Scanner input) {
 
         LogInfo loginfo;
@@ -32,9 +31,6 @@ public class FileScanner {
         while (input.hasNextLine()) {
             String line = input.nextLine();
             loginfo = Parser.parse(line);
-            if (line == null) {
-                break;
-            }
 
             if (loginfo.isEntry == true && !entries.containsKey(loginfo.id)) {
                 entries.put(loginfo.id, loginfo);
@@ -57,22 +53,17 @@ public class FileScanner {
 
         input.close();
 
-
-
         for (String method: methodsIndex.keySet()){
             thisIndex = methodsIndex.get(method);
             if (timers.get(thisIndex) == 0L){
                 continue;
             }
             String key = method.toString();
-            Long value = timers.get(thisIndex);
-            System.out.println(key + ": " + value/1e3 + " seconds");
+            Long value = timers.get(thisIndex); // milliseconds
+            System.out.printf("method \"%s\": %.3f seconds\n", key, (1.*value)/1e3);
         }
 
     }
-
-
-
 
 }
 
