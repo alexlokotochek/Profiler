@@ -3,8 +3,6 @@ package main.java.scanning;
 import main.java.util.LogInfo;
 import main.java.util.Parser;
 
-import java.io.File;
-import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -12,17 +10,31 @@ import java.util.HashMap;
 import java.util.Scanner;
 
 public class FileScanner {
+// выводим в консоль сводку по каждому методу, который попал в лог:
+// имя метода,
+// минимальное время,
+// максимальное время,
+// среднее время,
+// количество вызовов,
+// ID самого долгого вызова
 
     HashMap<Integer, LogInfo> entries;
-
-    ArrayList<Long> timers;
-    HashMap<String, Integer> methodsIndex; // метод и его индекс в timers
+    ArrayList<Long> sumTime, maximums, minimums;
+    ArrayList<Integer> callsAmount, longestCallsID;
+    HashMap<String, Integer> methodsIndex; // метод и его индекс в sumTime
 
     public void scan (Scanner input) {
 
         LogInfo loginfo;
+
         entries = new HashMap<>();
-        timers = new ArrayList<>();
+
+        sumTime = new ArrayList<>();
+        minimums = new ArrayList<>();
+        maximums = new ArrayList<>();
+        callsAmount = new ArrayList<>();
+        longestCallsID = new ArrayList<>();
+
         methodsIndex = new HashMap<>();
 
         Integer index = 0;
@@ -38,7 +50,11 @@ public class FileScanner {
 
                 if (!methodsIndex.containsKey(loginfo.method)) {
                     methodsIndex.put(loginfo.method, index);
-                    timers.add(0L);
+                    sumTime.add(0L);
+                    minimums.add(Long.MAX_VALUE);
+                    maximums.add(0L);
+                    callsAmount.add(0);
+                    longestCallsID.add(-1);
                     index++;
                 }
 
@@ -46,7 +62,19 @@ public class FileScanner {
                 LocalDateTime to = loginfo.time;
                 Long millis = from.until(to, ChronoUnit.MILLIS);
                 thisIndex = methodsIndex.get(loginfo.method);
-                timers.set(thisIndex, timers.get(thisIndex) + millis);
+                sumTime.set(thisIndex, sumTime.get(thisIndex) + millis);
+
+                if (millis < minimums.get(thisIndex)) {
+                    minimums.set(thisIndex, millis);
+                }
+
+                if (millis > maximums.get(thisIndex)) {
+                    maximums.set(thisIndex, millis);
+                    longestCallsID.set(thisIndex, loginfo.id);
+                }
+
+                callsAmount.set(thisIndex, callsAmount.get(thisIndex) + 1);
+
                 entries.remove(loginfo.id);
             }
         }
@@ -54,13 +82,24 @@ public class FileScanner {
         input.close();
 
         for (String method: methodsIndex.keySet()){
+
             thisIndex = methodsIndex.get(method);
-            if (timers.get(thisIndex) == 0L){
-                continue;
-            }
-            String key = method.toString();
-            Long value = timers.get(thisIndex); // milliseconds
-            System.out.printf("method \"%s\": %.3f seconds\n", key, (1.*value)/1e3);
+
+            String toPrint = String.format("method \"%s\":\n", method);
+            toPrint += String.format("min: %.3f seconds\n",
+                                     (1.*minimums.get(thisIndex))/1e3);
+            toPrint += String.format("max: %.3f seconds\n",
+                                     (1.*maximums.get(thisIndex))/1e3);
+            toPrint += String.format("mean: %.6f seconds\n",
+                                     (1.* sumTime.get(thisIndex)/callsAmount.get(thisIndex))/1e3);
+            toPrint += String.format("total calls: %d\n",
+                                     callsAmount.get(thisIndex));
+            toPrint += String.format("longest call ID: %d\n",
+                                     longestCallsID.get(thisIndex));
+            toPrint += "\n";
+
+            System.out.print(toPrint);
+
         }
 
     }
