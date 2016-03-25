@@ -18,33 +18,33 @@ public class FileScanner {
 // количество вызовов,
 // ID самого долгого вызова
 
-    HashMap<Integer, LogInfo> entries;
-    ArrayList<Long> sumTime, maximums, minimums;
-    ArrayList<Integer> callsAmount, longestCallsID;
-    HashMap<String, Integer> methodsIndex; // метод и его индекс в sumTime
+    static public ArrayList<String> scan (String path) {
 
-    public void scan (Scanner input) {
+        Scanner input = FileOpener.open(path);
+        if (input == null) {
+            return null;
+        }
 
         LogInfo loginfo;
 
-        entries = new HashMap<>();
+        HashMap<Integer, LogInfo> entries = new HashMap<>();
 
-        sumTime = new ArrayList<>();
-        minimums = new ArrayList<>();
-        maximums = new ArrayList<>();
-        callsAmount = new ArrayList<>();
-        longestCallsID = new ArrayList<>();
+        ArrayList<Long> sumTime = new ArrayList<>();
+        ArrayList<Long> minimums = new ArrayList<>();
+        ArrayList<Long> maximums = new ArrayList<>();
+        ArrayList<Integer> callsAmount = new ArrayList<>();
+        ArrayList<Integer> longestCallsID = new ArrayList<>();
 
-        methodsIndex = new HashMap<>();
+        HashMap<String, Integer> methodsIndex = new HashMap<>();
 
         Integer index = 0;
         Integer thisIndex;
 
         while (input.hasNextLine()) {
             String line = input.nextLine();
-            loginfo = Parser.parse(line);
+            loginfo = Parser.fullParse(line);
 
-            if (loginfo.isEntry == true && !entries.containsKey(loginfo.id)) {
+            if (loginfo.isEntry && !entries.containsKey(loginfo.id)) {
                 entries.put(loginfo.id, loginfo);
             } else {
 
@@ -74,42 +74,35 @@ public class FileScanner {
                 }
 
                 callsAmount.set(thisIndex, callsAmount.get(thisIndex) + 1);
-
                 entries.remove(loginfo.id);
             }
         }
 
         input.close();
 
+        ArrayList<String> result = new ArrayList<>();
+
         for (String method: methodsIndex.keySet()){
-
             thisIndex = methodsIndex.get(method);
-
             // Формат вывода:
             // OperationsImpl:getData min 123, max 846, avg 315, max id 22, count 333
             // будем выводить тысячные доли секунды, так как часто min < 1
             // в качестве разделителя возьмём ';', потому что дробная часть после ','
-
             // время хранится в Long: milliseconds, так что делим их на 1000 для секунд
-
             String toPrint = String.format("OperationsImpl:%s ", method);
             toPrint += String.format("min %.3f; ",
-                                     (1.*minimums.get(thisIndex))/1e3);
+                                     (1.* minimums.get(thisIndex))/1e3);
             toPrint += String.format("max %.3f; ",
-                                     (1.*maximums.get(thisIndex))/1e3);
+                                     (1.* maximums.get(thisIndex))/1e3);
             toPrint += String.format("avg %.3f; ",
-                                     (1.* sumTime.get(thisIndex)/callsAmount.get(thisIndex))/1e3);
+                                     (1.* sumTime.get(thisIndex)/ callsAmount.get(thisIndex))/1e3);
             toPrint += String.format("max id %d; ",
                                      longestCallsID.get(thisIndex));
             toPrint += String.format("count %d",
                                      callsAmount.get(thisIndex));
-
-            toPrint += "\n";
-
-            System.out.print(toPrint);
-
+            result.add(toPrint);
         }
-
+        return result;
     }
 
 }
