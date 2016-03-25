@@ -12,6 +12,7 @@ public class Parser {
     // id вызова (17907) и время (2015-10-26T16:10:05,005)
 
     public static LogInfo fullParse(String str){
+
         LogInfo loginfo = new LogInfo();
 
         String[] splittedStr = str.split(" ");
