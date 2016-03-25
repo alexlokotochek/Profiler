@@ -13,10 +13,12 @@ public class Main {
         // то, что id вызовов идут по порядку
         // и могут выйти за пределы AtomicLong
 
-        ArrayList<String> result = FileScanner.scan(args[0]);
-        //ArrayList<String> result = LinearFileScanner.scan(args[0]);
-        if (result != null) {
-            result.forEach(System.out::println);
+        if (args.length != 0) {
+//            ArrayList<String> result = FileScanner.scan(args[0]);
+            ArrayList<String> result = LinearFileScanner.scan(args[0]);
+            if (result != null) {
+                result.forEach(System.out::println);
+            }
         }
     }
 }
