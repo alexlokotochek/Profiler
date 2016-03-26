@@ -7,7 +7,6 @@ import java.util.Scanner;
 public class FileOpener {
 
     static public Scanner open(String path) {
-
         try {
 
             File file = new File(path);
@@ -20,7 +19,6 @@ public class FileOpener {
         }
 
         return null;
-
     }
 
 }
