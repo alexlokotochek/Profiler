@@ -1,4 +1,4 @@
-# Profiler.
+# Profiler usage: java -jar ___.jar logfilename.log
 methods log descriptor.
 Выводим в консоль сводку по каждому методу:
 имя метода,
