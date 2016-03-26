@@ -13,10 +13,21 @@ public class Parser {
     // мы хотим получить из неё название метода ("checkAuth")
     // id вызова (17907) и время (2015-10-26T16:10:05,005)
 
+    // построим автомат для регулярного выражения один раз
+    private static final String regex =
+            "^\\d\\d\\d\\d-\\d\\d-\\d\\d" +
+            "T\\d\\d:\\d\\d:\\d\\d,\\d\\d\\d\\s" +
+            "TRACE\\s\\[OperationsImpl\\]\\s" +
+            "(entry|exit)\\s" +
+            "with\\s\\(\\w+:\\d+\\)$";
+    private static final Pattern pattern = Pattern.compile(regex);
+
+
     public static LogInfo fullParse(String log) throws LogException {
 
-        if (!check(log)) {
-            throw new LogException();
+        Matcher matcher = pattern.matcher(log);
+        if (!matcher.matches()) {
+            throw new LogException(log);
         }
 
         LogInfo loginfo = new LogInfo();
@@ -38,21 +49,10 @@ public class Parser {
 
     }
 
-    private static boolean check(String log) {
-        String regex = "^\\d\\d\\d\\d-\\d\\d-\\d\\d" +
-                "T\\d\\d:\\d\\d:\\d\\d,\\d\\d\\d\\s" +
-                "TRACE\\s\\[OperationsImpl\\]\\s" +
-                "(entry|exit)\\s" +
-                "with\\s\\(\\w+:\\d+\\)$";
-        Pattern pattern = Pattern.compile(regex);
-        Matcher matcher = pattern.matcher(log);
-        return matcher.matches();
-    }
-
     public static class LogException extends Exception {
 
-        public LogException() {
-            super("Wrong log entry");
+        public LogException(String log) {
+            super("Wrong log entry:" + log);
         }
 
     }
